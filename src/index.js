@@ -6,7 +6,15 @@ dotenv.config({
   path: './env'
 })
 
-connectDB();
+connectDB()
+.then(() => {
+  app.listen(process.env.PORT || 8000, () => {
+    console.log(` servier is running at port : ${process.env.PORT}`);
+  })
+})
+.catch((err) => {
+  console.log("Monog db connection error :", err);
+})
 
 // First Approche but it make file nested 
 // import express from "express";
