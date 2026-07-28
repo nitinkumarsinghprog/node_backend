@@ -1,21 +1,32 @@
-require('dotenv').config();
-const express = require('express');
-const app = express();
+// require('dotenv').config({path: "./env"})
+import dotenv from "dotenv";
+import connectDB from "./db/index.js";
 
-const port = process.env.PORT || 4000;
+dotenv.config({
+  path: './env'
+})
 
-app.get('/', (req, res) => {
-    const data =[{
-        status : "running",
-        statusCode : 200
-    }]
-  res.send(data);
-});
+connectDB();
 
-app.get("/login", (req, res) => {
-    res.send("<h1>welcome********* to the login get method</h1>");
-});
+// First Approche but it make file nested 
+// import express from "express";
 
-app.listen(port, () => {
-  console.log(`Server is running on the port ${port}`);
-});
+// const app = express()
+
+// (async() => {
+//   try{
+//    await mongoose.connect(`${process.env.MONGOBD_URI}/${DB_NAME}`)
+//    app.on("error", (error) => {
+//     console.log("ERROR : ", error);
+//     throw error
+//    })
+
+//    app.listen(process.env.PORT, () => {
+//     console.log(`App is Listing on the port ${process.env.PORT}`)
+//    })
+
+//   }catch (error){
+//     console.error("ERROR : ", error)
+//     throw error
+//   }
+// })()
