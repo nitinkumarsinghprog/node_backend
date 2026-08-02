@@ -23,8 +23,8 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     // check for the images, check for avatar
-    const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path;
+    const avatarLocalPath = req.files?.avatar?.[0]?.path;
+    const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
 
     if(!avatarLocalPath) {
         throw new ApiError("Avatar image are required", 400);
@@ -32,7 +32,11 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // upload them on the cloudinary
     const avatar = await uploadImagesToCloudinary(avatarLocalPath);
-    const coverImage = await uploadImagesToCloudinary(coverImageLocalPath);
+    let coverImage = null;
+
+    if (coverImageLocalPath) {
+        coverImage = await uploadImagesToCloudinary(coverImageLocalPath);
+    }
 
     if(!avatar){
         throw new ApiError("Avatar image is required", 400);
@@ -50,7 +54,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // remove the password and refresh token from the response
     const createdUser = await User.findById(user._id).select("-password -refreshToken");
-
+    console.log("========== Response ==========");
+    console.log(JSON.stringify(createdUser, null, 2));
 
     // check for user creation 
     if(!createdUser) {
