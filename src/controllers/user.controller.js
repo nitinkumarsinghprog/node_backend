@@ -114,8 +114,14 @@ const loginUser = asyncHandler(async (req, res) => {
 
     // send cookies
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
+    console.log("========== Response ==========");
+    console.log(JSON.stringify(loggedInUser, null, 2));
 
-    const options ={httpOnly: true, secure: true};
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    };
 
     // return the response
     return res
@@ -138,26 +144,36 @@ const loginUser = asyncHandler(async (req, res) => {
 const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
-        { $set: { 
-            refreshToken: undefined
-            } 
+        {
+            $unset: {
+                refreshToken: 1
+            }
         },
-        { new: true }
-    )
+        {
+            returnDocument: "after"
+        }
+    );
 
-    const options = { httpOnly: true, secure: true };
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    };
+
+    const response = new ApiResponse(
+        200,
+        {},
+        "User logged out successfully"
+    );
+
+    console.log("========== Logout Response ==========");
+    console.dir(response, { depth: null });
 
     return res
-    .status(200)
-    .clearCookie("accessToken", options)
-    .clearCookie("refreshToken", options)
-    .json(
-        new ApiResponse(
-            200,
-            {},
-            "User logged out successfully"
-        )
-    );
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(response);
 });
 
 export {registerUser, loginUser, logoutUser};
