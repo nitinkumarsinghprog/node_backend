@@ -1,20 +1,21 @@
 // require('dotenv').config({path: "./env"})
 import dotenv from "dotenv";
 import connectDB from "./db/index.js";
+import app from "./app.js";
 
 dotenv.config({
-  path: './env'
-})
+    path: "./env"
+});
 
 connectDB()
 .then(() => {
-  app.listen(process.env.PORT || 8000, () => {
-    console.log(` servier is running at port : ${process.env.PORT}`);
-  })
+    app.listen(process.env.PORT || 8000, () => {
+        console.log(`Server running on port ${process.env.PORT || 8000}`);
+    });
 })
 .catch((err) => {
-  console.log("Monog db connection error :", err);
-})
+    console.log("MongoDB connection error:", err);
+});
 
 // First Approche but it make file nested 
 // import express from "express";
