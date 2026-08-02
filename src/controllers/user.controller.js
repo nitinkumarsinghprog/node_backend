@@ -178,10 +178,10 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 
 const refresAccessToken = asyncHandler(async (req, res) => {
-    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
+    const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
 
-    if(incomingRefreshToken) {
-        throw new ApiError(400, "unauthorized access Token is missing");
+    if(!incomingRefreshToken) {
+        throw new ApiError(401, "Refresh token is missing");
     }
 
     try{
@@ -203,14 +203,9 @@ const refresAccessToken = asyncHandler(async (req, res) => {
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         };
 
-        const { accessToken, newRefreshToken } = await generateAccessAndRefreshToken(user._id);
+        const { accessToken, refreshToken: newRefreshToken } = await generateAccessAndRefreshToken(user._id);
 
-        return res
-            .status(200)
-            .cookie("accessToken", accessToken, options)
-            .cookie("refreshToken", newRefreshToken, options)
-            .json(
-                new ApiResponse(
+         const response = new ApiResponse(
                     200,
                     {
                         accessToken: accessToken,
@@ -218,7 +213,15 @@ const refresAccessToken = asyncHandler(async (req, res) => {
                     },
                     "Access token refreshed successfully"
                 )
-            ); 
+
+        console.log("========== Refresh Access Token Response ==========");
+        console.dir(response, { depth: null });
+
+        return res
+            .status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", newRefreshToken, options)
+            .json( response ); 
     }catch (error) {
         throw new ApiError(401, "Invalid Refresh Token");
     } 
