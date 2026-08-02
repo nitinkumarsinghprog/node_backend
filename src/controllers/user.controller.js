@@ -1,15 +1,14 @@
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiError.js";
-import User from "../models/user.model.js";
+import { User } from "../models/user.model.js";
 import ApiResponse from "../utils/ApiResponse.js";
-import { uploadImagesToCloudinary } from "../utils/cloudinary.js";  
+import { uploadImagesToCloudinary } from "../utils/upload.js";
 
 
 const registerUser = asyncHandler(async (req, res) => {
 
      // get the user data form the user
     const { username, email, fullName, password } = req.body;
-    console.log("Email :",email);
 
      // validation on the user data - not empty 
     if (!username || !email || !fullName || !password) {
