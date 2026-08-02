@@ -12,14 +12,14 @@ const registerUser = asyncHandler(async (req, res) => {
 
      // validation on the user data - not empty 
     if (!username || !email || !fullName || !password) {
-        throw new ApiError("All fields are required", 400);
+        throw new ApiError(400, "All fields are required");
     }
 
     // check if the user already exists in the database using username or email
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
 
     if (existingUser) {
-        throw new ApiError("User with email or username already exists", 409);
+        throw new ApiError(409, "User with email or username already exists");
     }
 
     // check for the images, check for avatar
@@ -27,7 +27,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
 
     if(!avatarLocalPath) {
-        throw new ApiError("Avatar image are required", 400);
+        throw new ApiError(400, "Avatar image are required");
     }
 
     // upload them on the cloudinary
@@ -39,7 +39,7 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     if(!avatar){
-        throw new ApiError("Avatar image is required", 400);
+        throw new ApiError(400, "Avatar image is required");
     }
 
     // create user object - create entry in db 
@@ -59,7 +59,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // check for user creation 
     if(!createdUser) {
-        throw new ApiError("User not created", 500);
+        throw new ApiError(500, "User not created");
     }
 
     // return res 
