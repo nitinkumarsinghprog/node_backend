@@ -241,16 +241,25 @@ const changeCurrentPassword = asyncHandler (async (req, res) => {
     user.password = newPassword;
     await user.save({ validateBeforeSave: false });
 
-    return res.status(200).json(
-        new ApiResponse(200, {}, "Password changed successfully")
+    const response = new ApiResponse(
+        200, {}, "Password changed successfully"
     )
+
+    console.log("========== Change Password Response ==========");
+    console.dir(response, { depth: null });
+
+    return res.status(200).json(response);
     
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
-    return res.status(200).json(
-        new ApiResponse(200, req.user, "Current user fetched successfully")
-    )
+
+    const response =  new ApiResponse(200, req.user, "Current user fetched successfully")
+
+    console.log("========== Get Current User Response ==========");
+    console.dir(response, { depth: null });
+
+    return res.status(200).json(response);
 });
 
 const updateAccountDetails = asyncHandler (async (req, res) => {
@@ -269,9 +278,12 @@ const updateAccountDetails = asyncHandler (async (req, res) => {
     {new: true}
     ).select("_password");
 
-    return res.status(200).json(
-        new ApiResponse(200, user, "Account Details Updated Successfully")
-    );
+    const response =  new ApiResponse(200, user, "Account Details Updated Successfully");
+
+    console.log("========== Update Account Details Response ==========");
+    console.dir(response, { depth: null });
+
+    return res.status(200).json(response);
 });
 
 const updateUserAvatar = asynchandler(async (req, res)=> {
@@ -293,9 +305,12 @@ const updateUserAvatar = asynchandler(async (req, res)=> {
         }
     }, {new : true}).select("-password");
 
-    return res.status(200).json(
-        new ApiResponse(200, user, "Avatar Updated Successfully")
-    );
+    const response =   new ApiResponse(200, user, "Avatar Updated Successfully");
+
+    console.log("========== Update Avatar Response ==========");
+    console.dir(response, { depth: null });
+
+    return res.status(200).json(response);
 });
 
 const updateCoverImage = asynchandler(async (req, res)=> {
@@ -317,9 +332,82 @@ const updateCoverImage = asynchandler(async (req, res)=> {
         }
     }, {new : true}).select("-password");
 
-    return res.status(200).json(
-        new ApiResponse(200, user, "Cover Image Updated Successfully")
-    );
+    const response =   new ApiResponse(200, user, "Cover Image Updated Successfully");
+
+    console.log("========== Update Cover Image Response ==========");
+    console.dir(response, { depth: null });
+
+    return res.status(200).json(response);
+});
+
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+    const {username} = req.params;
+
+    if (!username?.trim()) {
+        throw new ApiError(400, "Username is missing");
+    }
+
+    const channel = await User.aggregate([
+        {
+            $match: {
+                username: username?.toLowerCase()
+            }
+            
+        },
+        {
+                
+            $lookup: {
+                from : "subscriptions",
+                localField: "_id",
+                foreignField: "channel",
+                as: "subscribers"
+            }
+        },
+        {
+            $lookup : {
+                from : "subscriptions",
+                localField: "_id",
+                foreignField: "subscriber",
+                as: "subscribedTo"
+            }
+        },
+        {
+            $addFields: {
+                subscribersCount: { $size: "$subscribers" },
+                subscribedToCount: { $size: "$subscribedTo" },
+                isSubscribed: {
+                    $cond: {
+                        if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+                        then: true,
+                        else: false
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                fullName: 1,
+                username: 1,
+                subscribersCount: 1,
+                subscribedToCount: 1,
+                isSubscribed: 1,
+                avatar: 1,
+                coverImage: 1,
+                email: 1
+            }
+        }
+    ]);
+
+    if (!channel?.length) {
+        throw new ApiError(404, "Channel does not exit");
+    }
+
+    const response =   new ApiResponse(200, channel[0], "User channel fecth Successfully");
+
+    console.log("========== Update Cover Image Response ==========");
+    console.dir(response, { depth: null });
+
+    return res.status(200).json( response );
 });
 
 export {
@@ -330,7 +418,8 @@ export {
     changeCurrentPassword, 
     getCurrentUser, 
     updateAccountDetails,
-    updateCoverImage, 
+    updateCoverImage,
     updateUserAvatar, 
+    getUserChannelProfile
 };
 
