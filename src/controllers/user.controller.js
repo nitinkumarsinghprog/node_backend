@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { uploadImagesToCloudinary } from "../utils/upload.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
@@ -410,6 +411,57 @@ const getUserChannelProfile = asyncHandler (async (req, res) => {
     return res.status(200).json( response );
 });
 
+const getWatchHistory = asyncHandler (async (req, res) => {
+    const user = await User.aggregate ([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(req.user._id)
+            }
+        },
+        {
+            $lookup: {
+                from: "video",
+                localField: "watchHistory",
+                foreignField: "_id",
+                as: "watchHistoy",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        fullName: 1,
+                                        username: 1,
+                                        avatar: 1,
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $addFields: {
+                            owner: {
+                                $first: "$owner"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ]);
+
+    const response =   new ApiResponse(200, user[0].watchHistory, "Watch History Fetch Successfully");
+
+    console.log("========== Update Cover Image Response ==========");
+    console.dir(response, { depth: null });
+
+    return res.status(200).json(response);
+});
+
 export {
     registerUser, 
     loginUser, 
@@ -420,6 +472,7 @@ export {
     updateAccountDetails,
     updateCoverImage,
     updateUserAvatar, 
-    getUserChannelProfile
+    getUserChannelProfile,
+    getWatchHistory
 };
 
