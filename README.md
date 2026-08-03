@@ -1,3 +1,3 @@
 Node Backend using node js and express 
 
-use npm run start to run the server 
+use npm run dev to run the server 
