@@ -20,7 +20,7 @@ const generateAccessAndRefreshToken = async (userId) => {
     }
 }
 
-const registerUser = asyncHandler(async (req, res) => {
+const registerUser = asyncHandler (async (req, res) => {
 
      // get the user data form the user
     const { username, email, fullName, password } = req.body;
@@ -88,7 +88,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
 });
 
-const loginUser = asyncHandler(async (req, res) => {
+const loginUser = asyncHandler (async (req, res) => {
     // req body -> data
     const { username, password, email } = req.body;
 
@@ -142,7 +142,7 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
-const logoutUser = asyncHandler(async (req, res) => {
+const logoutUser = asyncHandler (async (req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
@@ -177,7 +177,7 @@ const logoutUser = asyncHandler(async (req, res) => {
         .json(response);
 });
 
-const refresAccessToken = asyncHandler(async (req, res) => {
+const refresAccessToken = asyncHandler (async (req, res) => {
     const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
 
     if(!incomingRefreshToken) {
@@ -252,7 +252,7 @@ const changeCurrentPassword = asyncHandler (async (req, res) => {
     
 });
 
-const getCurrentUser = asyncHandler(async (req, res) => {
+const getCurrentUser = asyncHandler (async (req, res) => {
 
     const response =  new ApiResponse(200, req.user, "Current user fetched successfully")
 
@@ -286,7 +286,7 @@ const updateAccountDetails = asyncHandler (async (req, res) => {
     return res.status(200).json(response);
 });
 
-const updateUserAvatar = asynchandler(async (req, res)=> {
+const updateUserAvatar = asyncHandler (async (req, res)=> {
     const avtartLocalPath =  req.file?.path;
 
     if(!avtartLocalPath){
@@ -313,7 +313,7 @@ const updateUserAvatar = asynchandler(async (req, res)=> {
     return res.status(200).json(response);
 });
 
-const updateCoverImage = asynchandler(async (req, res)=> {
+const updateCoverImage = asyncHandler (async (req, res)=> {
     const coverImagePath =  req.file?.path;
 
     if(!coverImagePath){
@@ -340,7 +340,7 @@ const updateCoverImage = asynchandler(async (req, res)=> {
     return res.status(200).json(response);
 });
 
-const getUserChannelProfile = asyncHandler(async (req, res) => {
+const getUserChannelProfile = asyncHandler (async (req, res) => {
     const {username} = req.params;
 
     if (!username?.trim()) {
